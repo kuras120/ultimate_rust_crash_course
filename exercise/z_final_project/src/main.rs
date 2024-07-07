@@ -25,6 +25,28 @@
 //
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
+use clap::{CommandFactory, Parser, Subcommand};
+
+#[derive(Parser)]
+#[command(version)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Blur {
+        infile: String,
+        outfile: String,
+    },
+    Fractal {
+
+    },
+    #[command(external_subcommand)]
+    Default(Vec<String>),
+}
+
 fn main() {
     // 1. First, you need to implement some basic command-line argument handling
     // so you can make your program do different things.  Here's a little bit
@@ -32,22 +54,19 @@ fn main() {
     //
     // Challenge: If you're feeling really ambitious, you could delete this code
     // and use the "clap" library instead: https://docs.rs/clap/2.32.0/clap/
-    let mut args: Vec<String> = std::env::args().skip(1).collect();
-    if args.is_empty() {
-        print_usage_and_exit();
-    }
-    let subcommand = args.remove(0);
-    match subcommand.as_str() {
+    let cli = Cli::parse();
+    match cli.command {
         // EXAMPLE FOR CONVERSION OPERATIONS
-        "blur" => {
-            if args.len() != 2 {
-                print_usage_and_exit();
-            }
-            let infile = args.remove(0);
-            let outfile = args.remove(0);
+        Some(Commands::Blur { infile, outfile }) => {
+            println!("Blur infile {} and outfile {}", infile, outfile);
+            // if args.len() != 2 {
+            //     print_usage_and_exit();
+            // }
+            // let infile = args.remove(0);
+            // let outfile = args.remove(0);
             // **OPTION**
             // Improve the blur implementation -- see the blur() function below
-            blur(infile, outfile);
+            // blur(infile, outfile);
         }
 
         // **OPTION**
@@ -66,28 +85,84 @@ fn main() {
         // Grayscale -- see the grayscale() function below
 
         // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
-        "fractal" => {
-            if args.len() != 1 {
-                print_usage_and_exit();
-            }
-            let outfile = args.remove(0);
-            fractal(outfile);
+        Some(Commands::Fractal {}) => {
+            // if args.len() != 1 {
+            //     print_usage_and_exit();
+            // }
+            // let outfile = args.remove(0);
+            // fractal(outfile);
         }
 
+        Some(Commands::Default(_)) => {
+            println!("Unrecognized command");
+            print_usage_and_exit();
+        }
         // **OPTION**
         // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
 
         // For everything else...
-        _ => {
+        None => {
             print_usage_and_exit();
         }
     }
+    // let mut args: Vec<String> = std::env::args().skip(1).collect();
+    // if args.is_empty() {
+    //     print_usage_and_exit();
+    // }
+    // let subcommand = args.remove(0);
+    // match subcommand.as_str() {
+    //     // EXAMPLE FOR CONVERSION OPERATIONS
+    //     "blur" => {
+    //         if args.len() != 2 {
+    //             print_usage_and_exit();
+    //         }
+    //         let infile = args.remove(0);
+    //         let outfile = args.remove(0);
+    //         // **OPTION**
+    //         // Improve the blur implementation -- see the blur() function below
+    //         blur(infile, outfile);
+    //     }
+    //
+    //     // **OPTION**
+    //     // Brighten -- see the brighten() function below
+    //
+    //     // **OPTION**
+    //     // Crop -- see the crop() function below
+    //
+    //     // **OPTION**
+    //     // Rotate -- see the rotate() function below
+    //
+    //     // **OPTION**
+    //     // Invert -- see the invert() function below
+    //
+    //     // **OPTION**
+    //     // Grayscale -- see the grayscale() function below
+    //
+    //     // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
+    //     "fractal" => {
+    //         if args.len() != 1 {
+    //             print_usage_and_exit();
+    //         }
+    //         let outfile = args.remove(0);
+    //         fractal(outfile);
+    //     }
+    //
+    //     // **OPTION**
+    //     // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
+    //
+    //     // For everything else...
+    //     _ => {
+    //         print_usage_and_exit();
+    //     }
+    // }
 }
 
 fn print_usage_and_exit() {
-    println!("USAGE (when in doubt, use a .png extension on your filenames)");
-    println!("blur INFILE OUTFILE");
-    println!("fractal OUTFILE");
+    let mut cmd = Cli::command();
+    cmd.print_help().expect("Should print help list");
+    // println!("USAGE (when in doubt, use a .png extension on your filenames)");
+    // println!("blur INFILE OUTFILE");
+    // println!("fractal OUTFILE");
     // **OPTION**
     // Print useful information about what subcommands and arguments you can use
     // println!("...");
