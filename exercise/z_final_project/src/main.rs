@@ -25,7 +25,7 @@
 //
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
-use clap::{CommandFactory, Parser, Subcommand};
+use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
 use image::DynamicImage;
 
 #[derive(Parser)]
@@ -35,6 +35,7 @@ struct Cli {
     command: Option<Commands>,
 }
 
+#[derive(ValueEnum, Clone)]
 enum Rotation {
     Ninety = 90,
     OneEighty = 180,
@@ -64,6 +65,14 @@ enum Commands {
         infile: String,
         outfile: String,
         rotation: Rotation,
+    },
+    Invert {
+        infile: String,
+        outfile: String,
+    },
+    Grayscale {
+        infile: String,
+        outfile: String,
     },
     Fractal {
         outfile: String,
@@ -112,9 +121,17 @@ fn main() {
 
         // **OPTION**
         // Invert -- see the invert() function below
+        Some(Commands::Invert { infile, outfile }) => {
+            println!("Invert infile {} and outfile {}", infile, outfile);
+            invert(infile, outfile);
+        }
 
         // **OPTION**
         // Grayscale -- see the grayscale() function below
+        Some(Commands::Grayscale { infile, outfile }) => {
+            println!("Invert infile {} and outfile {}", infile, outfile);
+            grayscale(infile, outfile);
+        }
 
         // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
         Some(Commands::Fractal { outfile }) => {
@@ -208,19 +225,23 @@ fn rotate(infile: String, outfile: String, rotation: Rotation) {
 
 fn invert(infile: String, outfile: String) {
     // See blur() for an example of how to open an image.
-
+    let mut img = image::open(infile).expect("Failed to open INFILE.");
     // .invert() takes no arguments and converts the image in-place, so you
     // will use the same image to save out to a different file.
+    img.invert();
 
     // See blur() for an example of how to save the image.
+    img.save(outfile).expect("Failed writing OUTFILE.");
 }
 
 fn grayscale(infile: String, outfile: String) {
     // See blur() for an example of how to open an image.
-
+    let mut img = image::open(infile).expect("Failed to open INFILE.");
     // .grayscale() takes no arguments. It returns a new image.
+    let img2 = img.grayscale();
 
     // See blur() for an example of how to save the image.
+    img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
 fn generate(outfile: String) {
