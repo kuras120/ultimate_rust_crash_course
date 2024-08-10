@@ -77,6 +77,12 @@ enum Commands {
     Fractal {
         outfile: String,
     },
+    Generate {
+        outfile: String,
+        red: u8,
+        green: u8,
+        blue: u8,
+    },
     #[command(external_subcommand)]
     Default(Vec<String>),
 }
@@ -140,6 +146,9 @@ fn main() {
 
         // **OPTION**
         // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
+        Some(Commands::Generate { outfile, red, green, blue }) => {
+            generate(outfile, red, green, blue);
+        }
 
         // For everything else...
         None | Some(Commands::Default(_)) => {
@@ -244,9 +253,11 @@ fn grayscale(infile: String, outfile: String) {
     img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
-fn generate(outfile: String) {
+fn generate(outfile: String, mut red: u8, mut green: u8, mut blue: u8) {
     // Create an ImageBuffer -- see fractal() for an example
+    let square_size = 100;
 
+    let mut imgbuf = image::ImageBuffer::new(square_size, square_size);
     // Iterate over the coordinates and pixels of the image -- see fractal() for an example
 
     // Set the image to some solid color. -- see fractal() for an example
@@ -255,8 +266,24 @@ fn generate(outfile: String) {
     // to this function to use for the solid color.
 
     // Challenge 2: Generate something more interesting!
+    for (x, y, pixel) in imgbuf.enumerate_pixels_mut() {
+        let mut new_green = green;
+        let mut new_blue = blue;
+        if x == 0 || x == square_size - 1 {
+            println!("x {} y {}", x, y);
+            new_green = 255 - new_green;
+        } else if y == 0 || y == square_size - 1 {
+            println!("x {} y {}", x, y);
+            new_green = 255 - new_green;
+        }
+        if x as i32 - y as i32 == 0 || x + y == square_size - 1 {
+            new_blue = 255 - new_blue;
+        }
+        *pixel = image::Rgb([red, new_green, new_blue]);
+    }
 
     // See blur() for an example of how to save the image
+    imgbuf.save(outfile).unwrap();
 }
 
 // This code was adapted from https://github.com/PistonDevelopers/image
