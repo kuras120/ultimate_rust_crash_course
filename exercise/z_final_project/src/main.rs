@@ -25,14 +25,17 @@
 //
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
+use std::path::Path;
 use clap::{CommandFactory, Parser, Subcommand, ValueEnum};
 use image::DynamicImage;
 
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
+    infile: Option<String>,
+    outfile: String,
     #[command(subcommand)]
-    command: Option<Commands>,
+    command_vector: Vec<ChainCommands>,
 }
 
 #[derive(ValueEnum, Clone)]
@@ -43,42 +46,24 @@ enum Rotation {
 }
 
 #[derive(Subcommand)]
-enum Commands {
-    Blur {
-        infile: String,
-        outfile: String,
-    },
+enum ChainCommands {
+    Blur {},
     Brighten {
-        infile: String,
-        outfile: String,
         brightness: i32,
     },
     Crop {
-        infile: String,
-        outfile: String,
         x: u32,
         y: u32,
         width: u32,
         height: u32,
     },
     Rotate {
-        infile: String,
-        outfile: String,
         rotation: Rotation,
     },
-    Invert {
-        infile: String,
-        outfile: String,
-    },
-    Grayscale {
-        infile: String,
-        outfile: String,
-    },
-    Fractal {
-        outfile: String,
-    },
-    Generate {
-        outfile: String,
+    Invert {},
+    Grayscale {},
+    Fractal {},
+    Square {
         red: u8,
         green: u8,
         blue: u8,
@@ -95,64 +80,49 @@ fn main() {
     // Challenge: If you're feeling really ambitious, you could delete this code
     // and use the "clap" library instead: https://docs.rs/clap/2.32.0/clap/
     let cli = Cli::parse();
-    match cli.command {
-        // EXAMPLE FOR CONVERSION OPERATIONS
-        Some(Commands::Blur { infile, outfile }) => {
-            println!("Blur infile {} and outfile {}", infile, outfile);
-            // **OPTION**
-            // Improve the blur implementation -- see the blur() function below
-            blur(infile, outfile);
-        }
-
-        // **OPTION**
-        // Brighten -- see the brighten() function below
-        Some(Commands::Brighten { infile, outfile, brightness }) => {
-            println!("Brighten infile {} and outfile {}", infile, outfile);
-            brighten(infile, outfile, brightness);
-        }
-
-        // **OPTION**
-        // Crop -- see the crop() function below
-        Some(Commands::Crop { infile, outfile, x, y, width, height }) => {
-            println!("Crop infile {} and outfile {}", infile, outfile);
-            crop(infile, outfile, x, y, width, height);
-        }
-
-        // **OPTION**
-        // Rotate -- see the rotate() function below
-        Some(Commands::Rotate { infile, outfile, rotation }) => {
-            println!("Rotate infile {} and outfile {}", infile, outfile);
-            rotate(infile, outfile, rotation);
-        }
-
-        // **OPTION**
-        // Invert -- see the invert() function below
-        Some(Commands::Invert { infile, outfile }) => {
-            println!("Invert infile {} and outfile {}", infile, outfile);
-            invert(infile, outfile);
-        }
-
-        // **OPTION**
-        // Grayscale -- see the grayscale() function below
-        Some(Commands::Grayscale { infile, outfile }) => {
-            println!("Invert infile {} and outfile {}", infile, outfile);
-            grayscale(infile, outfile);
-        }
-
-        // A VERY DIFFERENT EXAMPLE...a really fun one. :-)
-        Some(Commands::Fractal { outfile }) => {
-            fractal(outfile);
-        }
-
-        // **OPTION**
-        // Generate -- see the generate() function below -- this should be sort of like "fractal()"!
-        Some(Commands::Generate { outfile, red, green, blue }) => {
-            generate(outfile, red, green, blue);
-        }
-
-        // For everything else...
-        None | Some(Commands::Default(_)) => {
-            print_usage_and_exit();
+    for command in cli.command_vector {
+        let infile = if Path::new(&cli.outfile).exists() {
+            cli.outfile.clone()
+        } else {
+            cli.infile.clone().expect("Infile should be provided")
+        };
+        let outfile = cli.outfile.clone();
+        match command {
+            ChainCommands::Blur {} => {
+                println!("Blur infile {} and outfile {}", infile, outfile);
+                // **OPTION**
+                // Improve the blur implementation -- see the blur() function below
+                blur(infile, outfile);
+            }
+            ChainCommands::Brighten { brightness } => {
+                println!("Brighten infile {} and outfile {}", infile, outfile);
+                brighten(infile, outfile, brightness);
+            }
+            ChainCommands::Crop { x, y, width, height } => {
+                println!("Crop infile {} and outfile {}", infile, outfile);
+                crop(infile, outfile, x, y, width, height);
+            }
+            ChainCommands::Rotate { rotation } => {
+                println!("Rotate infile {} and outfile {}", infile, outfile);
+                rotate(infile, outfile, rotation);
+            }
+            ChainCommands::Invert {} => {
+                println!("Invert infile {} and outfile {}", infile, outfile);
+                invert(infile, outfile);
+            }
+            ChainCommands::Grayscale {} => {
+                println!("Grayscale infile {} and outfile {}", infile, outfile);
+                grayscale(infile, outfile);
+            }
+            ChainCommands::Fractal {} => {
+                fractal(outfile);
+            }
+            ChainCommands::Square { red, green, blue } => {
+                generate(outfile, red, green, blue);
+            }
+            ChainCommands::Default(_) => {
+                print_usage_and_exit();
+            }
         }
     }
 }
