@@ -26,14 +26,16 @@
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
 use std::path::Path;
-use clap::{value_parser, CommandFactory, Parser, Subcommand, ValueEnum};
+use clap::{value_parser, CommandFactory, Parser, Subcommand, ValueEnum, ValueHint};
 use image::DynamicImage;
 
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
-    infile: Option<String>,
+    #[arg(value_hint = ValueHint::FilePath)]
     outfile: String,
+    #[arg(value_hint = ValueHint::FilePath, required = false)]
+    infile: Option<String>,
     #[arg(value_parser = value_parser!(String))]
     command_vector: Vec<String>,
 }
@@ -68,8 +70,8 @@ enum ChainCommands {
         green: u8,
         blue: u8,
     },
-    #[command(external_subcommand)]
-    Default(Vec<String>),
+    // #[command(external_subcommand)]
+    // Default(Vec<String>),
 }
 
 fn main() {
@@ -80,50 +82,89 @@ fn main() {
     // Challenge: If you're feeling really ambitious, you could delete this code
     // and use the "clap" library instead: https://docs.rs/clap/2.32.0/clap/
     let cli = Cli::parse();
-    // for command in cli.command_vector {
-    let infile = if Path::new(&cli.outfile).exists() {
-        cli.outfile.clone()
-    } else {
-        cli.infile.clone().expect("Infile should be provided")
-    };
-    let outfile = cli.outfile.clone();
-    match cli.command_vector {
-        ChainCommands::Blur {} => {
-            println!("Blur infile {} and outfile {}", infile, outfile);
-            // **OPTION**
-            // Improve the blur implementation -- see the blur() function below
-            blur(infile, outfile);
-        }
-        ChainCommands::Brighten { brightness } => {
-            println!("Brighten infile {} and outfile {}", infile, outfile);
-            brighten(infile, outfile, brightness);
-        }
-        ChainCommands::Crop { x, y, width, height } => {
-            println!("Crop infile {} and outfile {}", infile, outfile);
-            crop(infile, outfile, x, y, width, height);
-        }
-        ChainCommands::Rotate { rotation } => {
-            println!("Rotate infile {} and outfile {}", infile, outfile);
-            rotate(infile, outfile, rotation);
-        }
-        ChainCommands::Invert {} => {
-            println!("Invert infile {} and outfile {}", infile, outfile);
-            invert(infile, outfile);
-        }
-        ChainCommands::Grayscale {} => {
-            println!("Grayscale infile {} and outfile {}", infile, outfile);
-            grayscale(infile, outfile);
-        }
-        ChainCommands::Fractal {} => {
-            fractal(outfile);
-        }
-        ChainCommands::Square { red, green, blue } => {
-            generate(outfile, red, green, blue);
-        }
-        ChainCommands::Default(_) => {
-            print_usage_and_exit();
+    println!("{:?}", cli.command_vector);
+    for command in cli.command_vector {
+        let infile = if Path::new(&cli.outfile).exists() {
+            cli.outfile.clone()
+        } else {
+            cli.infile.clone().expect("Infile should be provided")
+        };
+        let outfile = cli.outfile.clone();
+        match command {
+            ChainCommands::Blur {} => {
+                println!("Blur infile {} and outfile {}", infile, outfile);
+                // **OPTION**
+                // Improve the blur implementation -- see the blur() function below
+                blur(infile, outfile);
+            }
+            ChainCommands::Brighten { brightness } => {
+                println!("Brighten infile {} and outfile {}", infile, outfile);
+                brighten(infile, outfile, brightness);
+            }
+            ChainCommands::Crop { x, y, width, height } => {
+                println!("Crop infile {} and outfile {}", infile, outfile);
+                crop(infile, outfile, x, y, width, height);
+            }
+            ChainCommands::Rotate { rotation } => {
+                println!("Rotate infile {} and outfile {}", infile, outfile);
+                rotate(infile, outfile, rotation);
+            }
+            ChainCommands::Invert {} => {
+                println!("Invert infile {} and outfile {}", infile, outfile);
+                invert(infile, outfile);
+            }
+            ChainCommands::Grayscale {} => {
+                println!("Grayscale infile {} and outfile {}", infile, outfile);
+                grayscale(infile, outfile);
+            }
+            ChainCommands::Fractal {} => {
+                fractal(outfile);
+            }
+            ChainCommands::Square { red, green, blue } => {
+                generate(outfile, red, green, blue);
+            }
+            // ChainCommands::Default(_) => {
+            //     print_usage_and_exit();
+            // }
         }
     }
+    // match cli.command_vector {
+    //     ChainCommands::Blur {} => {
+    //         println!("Blur infile {} and outfile {}", infile, outfile);
+    //         // **OPTION**
+    //         // Improve the blur implementation -- see the blur() function below
+    //         blur(infile, outfile);
+    //     }
+    //     ChainCommands::Brighten { brightness } => {
+    //         println!("Brighten infile {} and outfile {}", infile, outfile);
+    //         brighten(infile, outfile, brightness);
+    //     }
+    //     ChainCommands::Crop { x, y, width, height } => {
+    //         println!("Crop infile {} and outfile {}", infile, outfile);
+    //         crop(infile, outfile, x, y, width, height);
+    //     }
+    //     ChainCommands::Rotate { rotation } => {
+    //         println!("Rotate infile {} and outfile {}", infile, outfile);
+    //         rotate(infile, outfile, rotation);
+    //     }
+    //     ChainCommands::Invert {} => {
+    //         println!("Invert infile {} and outfile {}", infile, outfile);
+    //         invert(infile, outfile);
+    //     }
+    //     ChainCommands::Grayscale {} => {
+    //         println!("Grayscale infile {} and outfile {}", infile, outfile);
+    //         grayscale(infile, outfile);
+    //     }
+    //     ChainCommands::Fractal {} => {
+    //         fractal(outfile);
+    //     }
+    //     ChainCommands::Square { red, green, blue } => {
+    //         generate(outfile, red, green, blue);
+    //     }
+    //     // ChainCommands::Default(_) => {
+    //     //     print_usage_and_exit();
+    //     // }
+    // }
     // }
 }
 
