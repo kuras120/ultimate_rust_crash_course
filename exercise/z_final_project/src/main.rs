@@ -74,6 +74,15 @@ enum ChainCommands {
     // Default(Vec<String>),
 }
 
+fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
+    let chainCommands = Vec::<ChainCommands>::new();
+    for command in commands {
+        if "|".eq(command) {
+            
+        }
+    }
+}
+
 fn main() {
     // 1. First, you need to implement some basic command-line argument handling
     // so you can make your program do different things.  Here's a little bit
