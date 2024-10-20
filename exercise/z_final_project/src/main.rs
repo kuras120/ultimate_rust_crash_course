@@ -34,10 +34,10 @@ use image::DynamicImage;
 struct Cli {
     #[arg(value_hint = ValueHint::FilePath)]
     outfile: String,
-    #[arg(value_hint = ValueHint::FilePath, required = false)]
-    infile: Option<String>,
     #[arg(value_parser = value_parser!(String))]
     command_vector: Vec<String>,
+    #[arg(value_hint = ValueHint::FilePath, required = false, long = "infile")]
+    infile: Option<String>,
 }
 
 #[derive(ValueEnum, Clone, Debug)]
@@ -111,7 +111,7 @@ fn main() {
         let infile: Option<String> = if Path::new(&cli.outfile).exists() {
             Some(cli.outfile.clone())
         } else {
-            cli.infile.clone().or(None)
+            cli.infile.clone()
         };
         let outfile = cli.outfile.clone();
         match command {
