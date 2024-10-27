@@ -88,6 +88,22 @@ fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
                         .expect("brightness argument required").parse::<i32>()
                         .expect("argument must be a number")
                 });
+            },
+            "crop" => {
+                chain_commands.push(ChainCommands::Crop {
+                    x: command.get(1)
+                        .expect("x argument required").parse::<u32>()
+                        .expect("argument must be a number"),
+                    y: command.get(2)
+                              .expect("y argument required").parse::<u32>()
+                              .expect("argument must be a number"),
+                    width: command.get(3)
+                                  .expect("width argument required").parse::<u32>()
+                                  .expect("argument must be a number"),
+                    height: command.get(4)
+                                   .expect("height argument required").parse::<u32>()
+                                   .expect("argument must be a number"),
+                });
             }
             _ => {
                 print_usage_and_exit();
@@ -160,6 +176,11 @@ fn main() {
                 generate(outfile, red, green, blue);
             }
         }
+    }
+    if Path::new(&cli.outfile).exists() {
+        println!("Result was generated at {:?}", Path::new(&cli.outfile).canonicalize().unwrap());
+    } else {
+        println!("No file was generated. Provide infile or generate image first via fractal or square function");
     }
 }
 
