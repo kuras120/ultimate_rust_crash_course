@@ -40,14 +40,14 @@ struct Cli {
     infile: Option<String>,
 }
 
-#[derive(ValueEnum, Clone, Debug)]
+#[derive(ValueEnum, Clone, Copy, Debug)]
 enum Rotation {
     Ninety = 90,
     OneEighty = 180,
     TwoSeventy = 270,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Copy, Debug)]
 enum ChainCommands {
     Blur {},
     Brighten {
@@ -123,8 +123,8 @@ fn main() {
     let cli = Cli::parse();
     println!("{:?}", cli.command_vector);
     let chain_commands = split_command_vector(&cli.command_vector);
-    for command in chain_commands {
-        let infile: Option<String> = if Path::new(&cli.outfile).exists() {
+    for (index, &command) in chain_commands.iter().enumerate() {
+        let infile: Option<String> = if Path::new(&cli.outfile).exists() && index != 0 {
             Some(cli.outfile.clone())
         } else {
             cli.infile.clone()
