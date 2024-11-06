@@ -83,26 +83,27 @@ fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
                 chain_commands.push(ChainCommands::Blur {});
             },
             "brighten" => {
+                if chain_commands.len() != 2 {
+                    print_specific_usage_and_exit("Brighten", "<brightness>");
+                }
                 chain_commands.push(ChainCommands::Brighten {
-                    brightness: command.get(1)
-                        .expect("brightness argument required").parse::<i32>()
+                    brightness: command.get(1).unwrap().parse::<i32>()
                         .expect("argument must be a number")
                 });
             },
             "crop" => {
+                if chain_commands.len() != 5 {
+                    print_specific_usage_and_exit("Crop", "<x> <y> <width> <height>");
+                }
                 chain_commands.push(ChainCommands::Crop {
-                    x: command.get(1)
-                        .expect("x argument required").parse::<u32>()
+                    x: command.get(1).unwrap().parse::<u32>()
                         .expect("argument must be a number"),
-                    y: command.get(2)
-                              .expect("y argument required").parse::<u32>()
-                              .expect("argument must be a number"),
-                    width: command.get(3)
-                                  .expect("width argument required").parse::<u32>()
-                                  .expect("argument must be a number"),
-                    height: command.get(4)
-                                   .expect("height argument required").parse::<u32>()
-                                   .expect("argument must be a number"),
+                    y: command.get(2).unwrap().parse::<u32>()
+                        .expect("argument must be a number"),
+                    width: command.get(3).unwrap().parse::<u32>()
+                        .expect("argument must be a number"),
+                    height: command.get(4).unwrap().parse::<u32>()
+                        .expect("argument must be a number"),
                 });
             }
             _ => {
@@ -184,15 +185,16 @@ fn main() {
     }
 }
 
+fn print_specific_usage_and_exit(command: &str, message: &str) {
+    let mut cmd = Cli::command();
+    println!("{} {}", command, message);
+    cmd.print_help().expect("Should print help list");
+    std::process::exit(-1);
+}
+
 fn print_usage_and_exit() {
     let mut cmd = Cli::command();
     cmd.print_help().expect("Should print help list");
-    // println!("USAGE (when in doubt, use a .png extension on your filenames)");
-    // println!("blur INFILE OUTFILE");
-    // println!("fractal OUTFILE");
-    // **OPTION**
-    // Print useful information about what subcommands and arguments you can use
-    // println!("...");
     std::process::exit(-1);
 }
 
