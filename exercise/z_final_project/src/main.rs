@@ -26,7 +26,8 @@
 //     let positive_number: u32 = some_string.parse().expect("Failed to parse a number");
 
 use std::path::Path;
-use clap::{value_parser, CommandFactory, Parser, Subcommand, ValueEnum, ValueHint};
+use std::str::FromStr;
+use clap::{value_parser, CommandFactory, Parser, ValueHint};
 use image::DynamicImage;
 
 #[derive(Parser)]
@@ -40,11 +41,24 @@ struct Cli {
     infile: Option<String>,
 }
 
-#[derive(ValueEnum, Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 enum Rotation {
     Ninety = 90,
     OneEighty = 180,
     TwoSeventy = 270,
+}
+
+impl FromStr for Rotation {
+    type Err = &'static str;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.parse::<i32>() { 
+            Ok(90) => Ok(Rotation::Ninety),
+            Ok(180) => Ok(Rotation::OneEighty),
+            Ok(270) => Ok(Rotation::TwoSeventy),
+            _ => Err("Must be one of 90, 180, 270")
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -83,7 +97,7 @@ fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
                 chain_commands.push(ChainCommands::Blur {});
             },
             "brighten" => {
-                if chain_commands.len() != 2 {
+                if command.len() != 2 {
                     print_specific_usage_and_exit("Brighten", "<brightness>");
                 }
                 chain_commands.push(ChainCommands::Brighten {
@@ -92,7 +106,7 @@ fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
                 });
             },
             "crop" => {
-                if chain_commands.len() != 5 {
+                if command.len() != 5 {
                     print_specific_usage_and_exit("Crop", "<x> <y> <width> <height>");
                 }
                 chain_commands.push(ChainCommands::Crop {
@@ -105,7 +119,38 @@ fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
                     height: command.get(4).unwrap().parse::<u32>()
                         .expect("argument must be a number"),
                 });
-            }
+            },
+            "rotate" => {
+                if command.len() != 2 {
+                    print_specific_usage_and_exit("Rotate", "<rotation (90, 180, 270)>");
+                }
+                chain_commands.push(ChainCommands::Rotate {
+                    rotation: command.get(1).unwrap().parse::<Rotation>()
+                                     .expect("Invalid value for rotation"),
+                });
+            },
+            "invert" => {
+                chain_commands.push(ChainCommands::Invert {});
+            },
+            "grayscale" => {
+                chain_commands.push(ChainCommands::Grayscale {});
+            },
+            "fractal" => {
+                chain_commands.push(ChainCommands::Fractal {});
+            },
+            "square" => {
+                if command.len() != 4 {
+                    print_specific_usage_and_exit("Square", "<red> <green> <blue>");
+                }
+                chain_commands.push(ChainCommands::Square {
+                    red: command.get(1).unwrap().parse::<u8>()
+                                .expect("argument must be a number"),
+                    green: command.get(2).unwrap().parse::<u8>()
+                                  .expect("argument must be a number"),
+                    blue: command.get(3).unwrap().parse::<u8>()
+                                 .expect("argument must be a number"),
+                });
+            },
             _ => {
                 print_usage_and_exit();
             }
