@@ -1,5 +1,5 @@
 use std::str::FromStr;
-use clap::{value_parser, CommandFactory, Parser};
+use clap::{value_parser, CommandFactory, Parser, ValueHint};
 use image::DynamicImage;
 
 #[derive(Parser)]
@@ -13,8 +13,8 @@ pub struct Cli {
     pub infile: Option<String>,
 }
 
-#[derive(Clone, Copy, Debug)]
-enum Rotation {
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
+pub enum Rotation {
     Ninety = 90,
     OneEighty = 180,
     TwoSeventy = 270,
@@ -33,7 +33,7 @@ impl FromStr for Rotation {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum ChainCommands {
     Blur {},
     Brighten {
