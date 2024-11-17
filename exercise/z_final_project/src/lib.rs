@@ -133,15 +133,14 @@ pub fn split_command_vector(commands: &Vec<String>) -> Vec<ChainCommands> {
 
 fn print_specific_usage_and_exit(command: &str, message: &str) {
     let mut cmd = Cli::command();
-    println!("{} {}", command, message);
     cmd.print_help().expect("Should print help list");
-    std::process::exit(-1);
+    panic!("{} {}", command, message);
 }
 
 fn print_usage_and_exit() {
     let mut cmd = Cli::command();
     cmd.print_help().expect("Should print help list");
-    std::process::exit(-1);
+    panic!();
 }
 
 pub fn blur(infile: String, outfile: String) {
