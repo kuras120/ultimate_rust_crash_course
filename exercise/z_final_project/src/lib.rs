@@ -182,13 +182,13 @@ pub fn crop(infile: String, outfile: String, x: u32, y: u32, width: u32, height:
 
 pub fn rotate(infile: String, outfile: String, rotation: Rotation) {
     // See blur() for an example of how to open an image.
-    let mut img = image::open(infile).expect("Failed to open INFILE.");
+    let img = image::open(infile).expect("Failed to open INFILE.");
     // There are 3 rotate functions to choose from (all clockwise):
     //   .rotate90()
     //   .rotate180()
     //   .rotate270()
     // All three methods return a new image.  Pick one and use it!
-    let mut img2: DynamicImage;
+    let img2: DynamicImage;
     match rotation {
         Rotation::Ninety => {
             img2 = img.rotate90();
@@ -220,7 +220,7 @@ pub fn invert(infile: String, outfile: String) {
 
 pub fn grayscale(infile: String, outfile: String) {
     // See blur() for an example of how to open an image.
-    let mut img = image::open(infile).expect("Failed to open INFILE.");
+    let img = image::open(infile).expect("Failed to open INFILE.");
     // .grayscale() takes no arguments. It returns a new image.
     let img2 = img.grayscale();
 
@@ -228,7 +228,7 @@ pub fn grayscale(infile: String, outfile: String) {
     img2.save(outfile).expect("Failed writing OUTFILE.");
 }
 
-pub fn generate(outfile: String, mut red: u8, mut green: u8, mut blue: u8) {
+pub fn generate(outfile: String, red: u8, green: u8, blue: u8) {
     // Create an ImageBuffer -- see fractal() for an example
     let square_size = 100;
 
